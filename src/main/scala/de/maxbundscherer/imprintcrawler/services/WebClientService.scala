@@ -2,27 +2,33 @@ package de.maxbundscherer.imprintcrawler.services
 
 class WebClientService {
 
-  import sttp.client3._
+  import org.jsoup.Jsoup
+  import org.jsoup.nodes.Element
 
-  private val backend = HttpURLConnectionBackend()
+  import scala.jdk.CollectionConverters.IteratorHasAsScala
 
-  private def getRequest(targetUrl: String): Either[String, String] =
-    basicRequest
-      .get(uri"$targetUrl")
-      .send(backend)
-      .body
+  private case class HrefItem(label: String, target: String)
 
-  private def getHrefs(requestBody: String): Either[String, Vector[String]] = Left("not impl.")
+  private def getHrefs(targetUrl: String): Vector[HrefItem] = {
 
-  def printHrefs(targetUrl: String): Unit =
-    this.getRequest(targetUrl) match {
-      case Left(err) => println(s"Got network error ($err)")
-      case Right(requestBody) =>
-        this.getHrefs(requestBody) match {
-          case Left(err)   => println(s"Got parse error ($err)")
-          case Right(data) => println(s"Got href data ($data)")
-        }
+    val doc = Jsoup.connect(targetUrl).get()
 
-    }
+    val elements: Vector[Element] = Vector() ++ doc.select("a").iterator().asScala
+
+    elements.map(e =>
+      HrefItem(
+        label = e.attr("href"),
+        target = e.text
+      )
+    )
+  }
+
+  def printHrefs(targetUrl: String): Unit = {
+
+    val hrefs = this.getHrefs(targetUrl)
+
+    hrefs.foreach(d => println(d))
+
+  }
 
 }
