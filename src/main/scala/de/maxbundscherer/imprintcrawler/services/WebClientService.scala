@@ -24,10 +24,24 @@ class WebClientService {
   }
 
   def printHrefs(targetUrl: String): Unit = {
+    val filtered: Vector[HrefItem] =
+      this
+        .getHrefs(targetUrl)
+        .filter { item =>
+          val filterStrings: Vector[String] =
+            Vector("Impressum", "Imprint")
+              .map(_.toLowerCase())
+              .map(_.trim)
 
-    val hrefs = this.getHrefs(targetUrl)
+          val targets: Vector[String] =
+            Vector(item.label, item.target)
+              .map(_.toLowerCase)
+              .map(_.trim)
 
-    hrefs.foreach(d => println(d))
+          targets.exists(e => filterStrings.contains(e))
+        }
+
+    println(s"Found imprint urls (ignored) ($filtered)")
 
   }
 
