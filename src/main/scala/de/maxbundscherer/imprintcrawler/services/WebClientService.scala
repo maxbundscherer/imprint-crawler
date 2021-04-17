@@ -53,18 +53,30 @@ class WebClientService {
       trackedImprintUrlsAbs
     }
 
-  private def getRequest(targetUrl: String): String = {
+  private case class GetResponse(targetUrl: String, body: String, success: Boolean)
 
-    val doc = Jsoup.connect(targetUrl)
-    doc.get().body().html()
-  }
+  private def getRequest(targetUrl: String): GetResponse =
+    Try {
+
+      val doc = Jsoup.connect(targetUrl)
+      GetResponse(targetUrl = targetUrl, body = doc.get().body().html(), success = true)
+
+    } match {
+      case Failure(exception) =>
+        GetResponse(targetUrl = targetUrl, body = exception.getLocalizedMessage, success = false)
+      case Success(value) => value
+    }
 
   def printHrefs(targetUrl: String, searchTerms: Vector[String]): Unit = {
     println(s"DEBUG Crawl now $targetUrl")
     this.resolveAllImprintHrefs(targetUrl, searchTerms) match {
       case Failure(exception) => println(s"ERROR (${exception.getLocalizedMessage})")
       case Success(urls) =>
-        urls.foreach(d => println(s"INFO Got (${d})"))
+        val responses: Vector[GetResponse] = urls.map(getRequest)
+
+        responses.foreach(d => println(s"INFO Got response (${d.targetUrl}) (${d.success})"))
+      //TODO
+      //responses.filter(_.success == true).map()
     }
   }
 
