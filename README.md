@@ -20,3 +20,4 @@ Author: [Maximilian Bundscherer](https://bundscherer-online.de)
 ### Let's go (developer)
 
 - Run with ``sbt run``
+- (or) Run with ``sbt ~run``
