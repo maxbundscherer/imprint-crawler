@@ -5,6 +5,7 @@ class WebClientService {
   import org.jsoup.Jsoup
   import org.jsoup.nodes.Element
 
+  import scala.util.{ Failure, Success, Try }
   import scala.jdk.CollectionConverters.IteratorHasAsScala
 
   private case class HrefItem(label: String, target: String) {
@@ -28,28 +29,29 @@ class WebClientService {
   private def resolveAllImprintHrefs(
       targetUrl: String,
       searchTerms: Vector[String]
-  ): Vector[String] = {
+  ): Try[Vector[String]] =
+    Try {
 
-    val modTargetUrl   = if (targetUrl.endsWith("/")) targetUrl else targetUrl + "/"
-    val modSearchTerms = searchTerms.map(_.toLowerCase)
+      val modTargetUrl   = if (targetUrl.endsWith("/")) targetUrl else targetUrl + "/"
+      val modSearchTerms = searchTerms.map(_.toLowerCase)
 
-    val trackedImprintUrlsRel: Vector[HrefItem] =
-      this
-        .getHrefs(modTargetUrl)
-        .filter { item =>
-          Vector(item.label, item.target)
-            .map(_.toLowerCase)
-            .map(_.trim)
-            .exists(e => modSearchTerms.contains(e))
-        } ++ modSearchTerms.map(term => HrefItem(label = s"dummy-$term", target = s"/$term"))
+      val trackedImprintUrlsRel: Vector[HrefItem] =
+        this
+          .getHrefs(modTargetUrl)
+          .filter { item =>
+            Vector(item.label, item.target)
+              .map(_.toLowerCase)
+              .map(_.trim)
+              .exists(e => modSearchTerms.contains(e))
+          } ++ modSearchTerms.map(term => HrefItem(label = s"dummy-$term", target = s"/$term"))
 
-    val trackedImprintUrlsAbs: Vector[String] = trackedImprintUrlsRel.map { t =>
-      val url = if (t.target.startsWith("/")) t.target.substring(1) else t.target
-      modTargetUrl + url
-    }.distinct
+      val trackedImprintUrlsAbs: Vector[String] = trackedImprintUrlsRel.map { t =>
+        val url = if (t.target.startsWith("/")) t.target.substring(1) else t.target
+        modTargetUrl + url
+      }.distinct
 
-    trackedImprintUrlsAbs
-  }
+      trackedImprintUrlsAbs
+    }
 
   private def getRequest(targetUrl: String): String = {
 
@@ -58,8 +60,12 @@ class WebClientService {
   }
 
   def printHrefs(targetUrl: String, searchTerms: Vector[String]): Unit = {
-    println(s"WARN Crawl now $targetUrl")
-    this.resolveAllImprintHrefs(targetUrl, searchTerms).foreach(d => println(s"WARN Got (${d})"))
+    println(s"DEBUG Crawl now $targetUrl")
+    this.resolveAllImprintHrefs(targetUrl, searchTerms) match {
+      case Failure(exception) => println(s"ERROR (${exception.getLocalizedMessage})")
+      case Success(urls) =>
+        urls.foreach(d => println(s"INFO Got (${d})"))
+    }
   }
 
 }
