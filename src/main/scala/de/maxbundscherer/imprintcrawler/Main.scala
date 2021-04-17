@@ -2,6 +2,9 @@ package de.maxbundscherer.imprintcrawler
 
 object Main extends App {
 
-  println("Hello World")
+  import de.maxbundscherer.imprintcrawler.services.WebClientService
 
+  private val webClientService = new WebClientService()
+
+  webClientService.printHrefs(targetUrl = "http://example.org/")
 }
