@@ -6,5 +6,8 @@ object Main extends App {
 
   private val webClientService = new WebClientService()
 
-  webClientService.printHrefs(targetUrl = "http://example.org/")
+  val targetUrl   = "https://www.example.org/"
+  val searchTerms = Vector("Impressum", "Imprint")
+
+  webClientService.printHrefs(targetUrl = targetUrl, searchTerms = searchTerms)
 }

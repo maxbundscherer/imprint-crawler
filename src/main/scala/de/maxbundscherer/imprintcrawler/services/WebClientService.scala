@@ -7,7 +7,9 @@ class WebClientService {
 
   import scala.jdk.CollectionConverters.IteratorHasAsScala
 
-  private case class HrefItem(label: String, target: String)
+  private case class HrefItem(label: String, target: String) {
+    override def toString: String = s"[label=$label][target=$target]"
+  }
 
   private def getHrefs(targetUrl: String): Vector[HrefItem] = {
 
@@ -17,32 +19,47 @@ class WebClientService {
 
     elements.map(e =>
       HrefItem(
-        label = e.attr("href"),
-        target = e.text
+        label = e.text,
+        target = e.attr("href")
       )
     )
   }
 
-  def printHrefs(targetUrl: String): Unit = {
-    val filtered: Vector[HrefItem] =
+  private def resolveAllImprintHrefs(
+      targetUrl: String,
+      searchTerms: Vector[String]
+  ): Vector[String] = {
+
+    val modTargetUrl   = if (targetUrl.endsWith("/")) targetUrl else targetUrl + "/"
+    val modSearchTerms = searchTerms.map(_.toLowerCase)
+
+    val trackedImprintUrlsRel: Vector[HrefItem] =
       this
-        .getHrefs(targetUrl)
+        .getHrefs(modTargetUrl)
         .filter { item =>
-          val filterStrings: Vector[String] =
-            Vector("Impressum", "Imprint")
-              .map(_.toLowerCase())
-              .map(_.trim)
+          Vector(item.label, item.target)
+            .map(_.toLowerCase)
+            .map(_.trim)
+            .exists(e => modSearchTerms.contains(e))
+        } ++ modSearchTerms.map(term => HrefItem(label = s"dummy-$term", target = s"/$term"))
 
-          val targets: Vector[String] =
-            Vector(item.label, item.target)
-              .map(_.toLowerCase)
-              .map(_.trim)
+    val trackedImprintUrlsAbs: Vector[String] = trackedImprintUrlsRel.map { t =>
+      val url = if (t.target.startsWith("/")) t.target.substring(1) else t.target
+      modTargetUrl + url
+    }.distinct
 
-          targets.exists(e => filterStrings.contains(e))
-        }
+    trackedImprintUrlsAbs
+  }
 
-    println(s"Found imprint urls (ignored) ($filtered)")
+  private def getRequest(targetUrl: String): String = {
 
+    val doc = Jsoup.connect(targetUrl)
+    doc.get().body().html()
+  }
+
+  def printHrefs(targetUrl: String, searchTerms: Vector[String]): Unit = {
+    println(s"WARN Crawl now $targetUrl")
+    this.resolveAllImprintHrefs(targetUrl, searchTerms).foreach(d => println(s"WARN Got (${d})"))
   }
 
 }
