@@ -2,7 +2,7 @@
 
 A legal notice crawler...
 
-``metadata - extractor - imprint - website - scala``
+``metadata - extractor - legal notice - website - scala``
 
 Tested on macOS (with openJDK-11)
 
