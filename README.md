@@ -1,6 +1,6 @@
 # Legal Notice Crawler
 
-A legal notice crawler...
+A legal notice crawler... Written in scala
 
 ``metadata - extractor - legal notice - website - scala``
 
