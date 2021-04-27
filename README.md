@@ -1,6 +1,6 @@
-# Imprint Crawler
+# Legal Notice Crawler
 
-An imprint crawler...
+A legal notice crawler...
 
 ``metadata - extractor - imprint - website - scala``
 

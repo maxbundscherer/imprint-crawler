@@ -6,8 +6,11 @@ object Main extends App {
 
   private val webClientService = new WebClientService()
 
+  //TODO: Add target url resolver
+  //TODO: Add legal-notice term (-)
+
   val targetUrl   = "https://www.example.org/"
-  val searchTerms = Vector("Impressum", "Imprint", "Legal")
+  val searchTerms = Vector("Impressum", "Legal", "Imprint")
 
   webClientService.printHrefs(targetUrl = targetUrl, searchTerms = searchTerms)
 }

@@ -26,7 +26,7 @@ class WebClientService {
     )
   }
 
-  private def resolveAllImprintHrefs(
+  private def resolveAllLegalNoticeHrefs(
       targetUrl: String,
       searchTerms: Vector[String]
   ): Try[Vector[String]] =
@@ -35,7 +35,7 @@ class WebClientService {
       val modTargetUrl   = if (targetUrl.endsWith("/")) targetUrl else targetUrl + "/"
       val modSearchTerms = searchTerms.map(_.toLowerCase)
 
-      val trackedImprintUrlsRel: Vector[HrefItem] =
+      val trackedLegalNoticeUrlsRel: Vector[HrefItem] =
         this
           .getHrefs(modTargetUrl)
           .filter { item =>
@@ -45,12 +45,12 @@ class WebClientService {
               .exists(e => modSearchTerms.contains(e))
           } ++ modSearchTerms.map(term => HrefItem(label = s"dummy-$term", target = s"/$term"))
 
-      val trackedImprintUrlsAbs: Vector[String] = trackedImprintUrlsRel.map { t =>
+      val trackedLegalNoticeUrlsAbs: Vector[String] = trackedLegalNoticeUrlsRel.map { t =>
         val url = if (t.target.startsWith("/")) t.target.substring(1) else t.target
         modTargetUrl + url
       }.distinct
 
-      trackedImprintUrlsAbs
+      trackedLegalNoticeUrlsAbs
     }
 
   private case class GetResponse(targetUrl: String, body: String, success: Boolean)
@@ -69,7 +69,7 @@ class WebClientService {
 
   def printHrefs(targetUrl: String, searchTerms: Vector[String]): Unit = {
     println(s"DEBUG Crawl now $targetUrl")
-    this.resolveAllImprintHrefs(targetUrl, searchTerms) match {
+    this.resolveAllLegalNoticeHrefs(targetUrl, searchTerms) match {
       case Failure(exception) => println(s"ERROR (${exception.getLocalizedMessage})")
       case Success(urls) =>
         val responses: Vector[GetResponse] = urls.map(getRequest)
