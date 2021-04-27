@@ -1,4 +1,4 @@
-package de.maxbundscherer.imprintcrawler.services
+package de.maxbundscherer.legalnoticecrawler.services
 
 class WebClientService {
 

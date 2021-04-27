@@ -1,4 +1,4 @@
-name := "imprint-crawler"
+name := "legal-notice-crawler"
 version := "0.1"
 scalaVersion := "2.13.5"
 

@@ -1,8 +1,8 @@
-package de.maxbundscherer.imprintcrawler
+package de.maxbundscherer.legalnoticecrawler
 
 object Main extends App {
 
-  import de.maxbundscherer.imprintcrawler.services.WebClientService
+  import de.maxbundscherer.legalnoticecrawler.services.WebClientService
 
   private val webClientService = new WebClientService()
 
